@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dummyProducts } from "../assets/assets";
+import toast from "react-hot-toast";
 
 export const AppContext = createContext();
 
@@ -16,8 +17,8 @@ export const AppContextProvider = ({ children }) => {
   const fetchProducts = async () => {
     setProducts(dummyProducts);
   };
-
-  const addToCart = () => {
+  // add to cart funcatioanlty
+  const addToCart = (itemId) => {
     let cartData = structuredClone(cartItems);
     if (cartData[itemId]) {
       cartData[itemId] += 1;
@@ -27,10 +28,30 @@ export const AppContextProvider = ({ children }) => {
     setCartItems(cartData);
     toast.success("Added to Cart");
   };
+  // update cart items quantity
+  const updateCartItem = (itemId, quantity) => {
+    let cartData = structuredClone(cartItems);
+    cartData[itemId] = quantity;
+    setCartItems(cartData);
+    toast.success("cart Updated");
+  };
+  // remove Items Form cart
+
+  const removeFromCart = (itemId) => {
+    let cartData = structuredClone(cartItems);
+    if (cartData[itemId]) {
+      cartData[itemId] -= 1;
+      if (cartData[itemId] === 0) {
+        delete cartData[itemId];
+      }
+    }
+    toast.success("Removed from Cart");
+    setCartItems(cartData);
+  };
 
   useEffect(() => {
     fetchProducts();
-  });
+  }, []);
   const value = {
     navigate,
     user,
@@ -41,6 +62,10 @@ export const AppContextProvider = ({ children }) => {
     setShowUserLogin,
     products,
     currency,
+    addToCart,
+    updateCartItem,
+    removeFromCart,
+    cartItems,
   };
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
