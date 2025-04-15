@@ -195,7 +195,6 @@ const Cart = () => {
               {currency}
               {getCartAmount()}
             </span>
-            <span>$20</span>
           </p>
           <p className="flex justify-between">
             <span>Shipping Fee</span>
