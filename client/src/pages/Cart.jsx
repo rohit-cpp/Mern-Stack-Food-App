@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { assets, dummyAddress } from "../assets/assets";
 import ProductCategory from "./ProductCategory";
+import toast from "react-hot-toast";
 
 const Cart = () => {
   const {
@@ -13,23 +14,66 @@ const Cart = () => {
     updateCartItem,
     navigate,
     getCartAmount,
+    axios,
+    user,
+    setCartItems,
   } = useAppContext();
   const [cartArray, setCartArray] = useState([]);
-  const [addresses, setAddresses] = useState(dummyAddress);
+  const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(false);
-  const [showAddress, setShowAddress] = useState(dummyAddress[0]);
+  const [showAddress, setShowAddress] = useState([]);
   const [paymentOption, setPaymentOption] = useState("COD");
 
   const getCart = () => {
     let tempArray = [];
     for (const key in cartItems) {
       const product = products.find((item) => item._id === key);
-      product.quantity = cartItems[key];
-      tempArray.push(product);
+      if (product) {
+        product.quantity = cartItems[key];
+        tempArray.push(product);
+      }
     }
     setCartArray(tempArray);
   };
-  const placeOrder = async () => {};
+
+  const placeOrder = async () => {
+    try {
+      if (paymentOption === "COD") {
+        const { data } = await axios.post("/api/order/cod", {
+          userId: user._id,
+          items: cartArray.map((item) => ({
+            product: item._id,
+            quantity: item._quantity,
+          })),
+          address: selectedAddress._id,
+        });
+        if (data.success) {
+          toast.success(data.message);
+          setCartItems({});
+          navigate("/my-orders");
+        } else {
+          toast.error(data.message);
+        }
+      } else {
+        //place order with stripe
+        const { data } = await axios.post("/api/order/stripe", {
+          userId: user._id,
+          items: cartArray.map((item) => ({
+            product: item._id,
+            quantity: item._quantity,
+          })),
+          address: selectedAddress._id,
+        });
+        if (data.success) {
+          window.location.replace(data.url);
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   useEffect(() => {
     if (products.length > 0 && cartItems) {
@@ -160,6 +204,7 @@ const Cart = () => {
                       setShowAddress(false);
                     }}
                     className="text-gray-500 p-2 hover:bg-gray-100"
+                    key={index}
                   >
                     {address.street},{address.city},{address.state},
                     {address.country}
