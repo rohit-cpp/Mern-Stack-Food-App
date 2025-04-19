@@ -9,7 +9,7 @@ Welcome to **FoodieHub**, my **first full-fledged MERN stack project** – a ful
 
 ## 🔗 Live Demo
 
-🌐 [Link](mern-ivory-sigma.vercel.app/)  
+🌐 [Link](https://mern-ivory-sigma.vercel.app/)  
 
 
 ---
